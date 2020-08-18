@@ -1,13 +1,13 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {MainCounter, CounterButton} from './style/styleComponents'
 
-const propTypes = {
-  action: PropTypes.func.isRequired,
-  setCount: PropTypes.func.isRequired,
-  count: PropTypes.number.isRequired,
+interface CounterProps {
+  action(): void;
+  setCount(value: number): void;
+  count: number;
 }
-export const Counter = ({action, setCount, count}) => {
+
+export const Counter: React.FC<CounterProps> = ({action, setCount, count}) => {
   return (
     <MainCounter>
       <CounterButton onClick={() => count !== 0 && setCount(count - 1)}>
@@ -19,4 +19,3 @@ export const Counter = ({action, setCount, count}) => {
     </MainCounter>
   )
 }
-Counter.propTypes = propTypes

@@ -1,5 +1,4 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { useMemo } from 'react'
 import {computeEachRow} from '../../helpers/basket'
 import {getFormattedPrice} from '../../helpers/currencies'
 import {
@@ -8,18 +7,26 @@ import {
   TitleBasket,
   CounterButton,
 } from '../dumb/style/styleComponents'
+import { Pizza } from '../pizzas/HomePizzas'
 
-// we type the props for the component
-const propTypes = {
-  isHidden: PropTypes.bool.isRequired,
-  basket: PropTypes.object.isRequired,
-  pizzas: PropTypes.array.isRequired,
-  addItem: PropTypes.func.isRequired,
-  removeItem: PropTypes.func.isRequired,
-  payBasket: PropTypes.func.isRequired,
+interface BasketListProps {
+  isHidden: boolean;
+  basket: any;
+  pizzas: Pizza[];
+  addItem(id: number, quantity: number): void;
+  removeItem(id: number, quantity: number): void;
+  payBasket(): void;
 }
 
-export const BasketList = ({
+interface BasketRow {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  total: number;
+}
+
+export const BasketList: React.FC<BasketListProps> = ({
   isHidden,
   basket,
   pizzas,
@@ -28,12 +35,15 @@ export const BasketList = ({
   payBasket,
 }) => {
   // function that you can find in the helpers folder.
-  const basketRowValues = computeEachRow(basket, pizzas)
+  const basketRowValues: BasketRow[] = useMemo(() => {
+    return computeEachRow(basket, pizzas)
+  }, [computeEachRow, basket, pizzas])
+
   return (
     <ListBasket isHidden={isHidden}>
       <TitleBasket>Basket list</TitleBasket>
       {basketRowValues && basketRowValues.length !== 0 ? (
-        <CounterButton onClick={() => payBasket()}>Pay</CounterButton>
+        <CounterButton onClick={payBasket}>Pay</CounterButton>
       ) : (
         <span>No item in the basket yet</span>
       )}
@@ -71,5 +81,3 @@ export const BasketList = ({
     </ListBasket>
   )
 }
-
-BasketList.propTypes = propTypes
