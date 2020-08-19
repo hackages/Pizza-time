@@ -1,18 +1,15 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useContext } from 'react'
 import {computeTotalPrice} from '../../helpers/basket'
 import {getFormattedPrice} from '../../helpers/currencies'
 import {UserBasketDiv, StyledDiv} from '../dumb/style/styleComponents'
-import { Pizza } from '../pizzas/HomePizzas'
+import { State } from '../../reducers'
+import { useSelector } from 'react-redux'
+import { AppCtx } from '../../App'
 
-interface UserBasket {
-  setIsHidden(hidden: boolean): void;
-  basket: any;
-  pizzas: Pizza[];
-  isHidden: boolean;
-}
-
-export const UserBasket: React.FC<UserBasket> = ({setIsHidden, basket, pizzas, isHidden}) => {
-  // function that you can find in the helpers folder.
+export const UserBasket = () => {
+  const { data: pizzas, basket, isHidden } = useSelector<State, State>(state => state)
+  const { setIsHidden } = useContext(AppCtx)
+  
   const total = useMemo(() => {
     return computeTotalPrice(basket, pizzas)
   }, [computeTotalPrice, basket, pizzas])

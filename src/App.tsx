@@ -1,9 +1,25 @@
-import React, {createContext, useEffect, useReducer, useContext, useCallback} from 'react'
+import React, {
+  createContext, 
+  useEffect,  
+  useCallback
+} from 'react'
 import {HommePizzas, PizzaState, Pizza} from './components/pizzas/HomePizzas'
 import {Header} from './components/dumb/Header'
 import {BasketList} from './components/basket/BasketList'
 import {MainDiv} from './components/dumb/style/styleComponents'
+import { useDispatch, useSelector } from 'react-redux'
 import {getPizzas} from './api'
+import { 
+  startLoading,
+  addPizzas, 
+  showError, 
+  stopLoading, 
+  setHidden, 
+  restart, 
+  updateBasket, 
+  pay 
+} from './actions'
+import { State } from './reducers'
 
 /*
 / This is the main file of app
@@ -11,33 +27,17 @@ import {getPizzas} from './api'
 / We use the state store the pizzas and the diffent states of the App
 / Then we use function to handle the changes in the state
 */
-interface Basket {
-  id: number;
-}
-
-interface State {
-  isHidden: boolean;
-  isLoading: boolean;
-  isError: boolean;
-  data: Pizza[];
-  basket: Basket;
-  payed: boolean;
-}
-
-interface Action {
-  type: string;
-  payload?: any;
+export interface Basket {
+  [key: number]: {
+    quantity: number;
+  };
 }
 
 interface AppContextData {
-  pizzaState: PizzaState;
-  appState: {
-    basket: Basket;
-    payed: boolean;
-  };
   addItem(id: number, quantity: number): void;
   removeItem(id: number, quantity: number): void;
   payBasket(): void;
+  setIsHidden(value: boolean): void;
 }
 
 // We use a Global context in this app to pass the infos to the children.
@@ -47,78 +47,23 @@ export const AppCtx = createContext({} as AppContextData)
 // Global state
 // hint: using useState when you have too much property can be very messy
 // A Reducer could be nice in this case
-const initialState: State = {
-  isHidden: true,
-  isLoading: false,
-  isError: false,
-  data: [],
-  basket: {} as Basket,
-  payed: false,
-}
 
-const reducer = (state: State, action: Action) => {
-  switch (action.type) {
-    case 'START_LOADING':
-      return {
-        ...state,
-        isLoading: true
-      }
-    case 'STOP_LOADING':
-      return {
-        ...state,
-        isLoading: false
-      }
-    case 'ADD_PIZZAS':
-      return {
-        ...state,
-        data: action.payload
-      }
-    case 'SHOW_ERROR':
-      return {
-        ...state,
-        isError: true
-      }
-    case 'SET_HIDDEN':
-      return {
-        ...state,
-        isHidden: action.payload
-      }
-    case 'RESTART_TRANSACTION':
-      return {
-        ...state,
-        basket: {},
-        payed: false
-      }
-    case 'UPDATE_BASKET':
-      return {
-        ...state,
-        basket: action.payload
-      }
-    case 'PAY_BASKET':
-      return {
-        ...state,
-        payed: true
-      }
-    default:
-      return state
-  }
-}
 
 // A stateless component
 const App = () => {
-  const [state, dispatch] = useReducer(reducer, initialState)
-
+  const { basket, isHidden, isLoading, payed, data, isError } = useSelector<State, State>(state => state)
+  const dispatch = useDispatch()
   // we fetch the pizzas
   useEffect(() => {
     async function loadPizzas() {
       try {
-        dispatch({type: 'START_LOADING'})
-        const pizzas = await getPizzas()
-        dispatch({type: 'ADD_PIZZAS', payload: pizzas})
+        dispatch(startLoading())
+        const pizzas = await getPizzas() as Pizza[]
+        dispatch(addPizzas(pizzas))
       } catch {
-        dispatch({type: 'SHOW_ERROR'})
+        dispatch(showError())
       } finally {
-        dispatch({type: 'STOP_LOADING'})
+        dispatch(stopLoading())
       }
     }
 
@@ -126,51 +71,42 @@ const App = () => {
   }, [])
 
   const setIsHidden = useCallback((value: boolean) => {
-    dispatch({type: 'SET_HIDDEN', payload: value})
-  }, [dispatch])
+    dispatch(setHidden(value))
+  }, [dispatch, setHidden])
 
   const restartTransaction = useCallback(() => {
-    dispatch({type: 'RESTART_TRANSACTION'})
-  }, [dispatch])
+    dispatch(restart())
+  }, [dispatch, restart])
 
   const addItem = useCallback((id: number, quantity: number) => {
-    const oldItem = state.basket[id]
+    const oldItem = basket[id]
     if (!oldItem) {
-      dispatch({type: 'UPDATE_BASKET', payload: {...state.basket, [id]: {quantity}}})
+      dispatch(updateBasket({...basket, [id]: {quantity}}))
     } else {
-      dispatch({
-        type: 'UPDATE_BASKET', 
-        payload: {...state.basket, [id]: {quantity: oldItem.quantity + quantity}}
-      })
+      dispatch(updateBasket({...basket, [id]: {quantity: oldItem.quantity + quantity}}))
     }
-  }, [state, dispatch])
+  }, [basket, dispatch, updateBasket])
 
   const removeItem = useCallback((id: number, quantity: number) => {
-    const oldItem = state.basket[id]
-    dispatch({
-      type: 'UPDATE_BASKET', 
-      payload: {...state.basket, [id]: {quantity: oldItem.quantity - quantity}}
-    })
-  }, [state, dispatch])
+    const oldItem = basket[id]
+    dispatch(updateBasket({...basket, [id]: {quantity: oldItem.quantity - quantity}}))
+  }, [basket, dispatch, updateBasket])
 
   const payBasket = useCallback(() => {
-    dispatch({type: 'PAY_BASKET'})
-  }, [])
-  
-  const {isHidden, isLoading, isError, data, basket, payed} = state
+    dispatch(pay())
+  }, [dispatch, pay])
     
   return (
     <AppCtx.Provider
       value={{
-        pizzaState: {isLoading, isError, data},
-        appState: {basket, payed},
         addItem,
         removeItem,
         payBasket,
+        setIsHidden
       }}
     >
       <div>
-        <Header setIsHidden={setIsHidden} isHidden={isHidden} />
+        <Header />
 
         {payed ? (
           <div>
@@ -188,8 +124,13 @@ const App = () => {
           <MainDiv>
             {/* There is nicer way to fetch the data from a context using a hook */}
             <HommePizzas
-              isHidden={isHidden}
               addItem={addItem}
+              isHidden={isHidden}
+              pizzaState={{
+                data,
+                isLoading,
+                isError
+              }}
             />
             {/* Same than above */}              
             <BasketList

@@ -1,7 +1,6 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import {PizzaList, Title} from '../dumb/style/styleComponents'
 import {PizzaDetails} from './PizzaDetails'
-import { AppCtx } from '../../App'
 
 export interface Pizza {
   id: number;
@@ -16,12 +15,12 @@ export interface PizzaState {
 }
 
 interface HomePizzasProps {
+  pizzaState: PizzaState;
   isHidden: boolean;
   addItem(id: number, quantity: number): void;
 }
 
-export const HommePizzas: React.FC<HomePizzasProps> = ({isHidden, addItem}) => {
-  const { pizzaState } = useContext(AppCtx)
+export const HommePizzas: React.FC<HomePizzasProps> = ({pizzaState, isHidden, addItem}) => {
   const {data: pizzas, isLoading, isError} = pizzaState
   
   if (isLoading) {
