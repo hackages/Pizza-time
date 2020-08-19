@@ -1,9 +1,7 @@
-import {pizzas} from './pizzas'
+import axios from 'axios'
 
-// Function used to get the pizzas.
-// We use a promise and a setTimeout to simulate an Http Call
+const api = axios.create({
+  baseURL: 'http://localhost:3333',
+});
 
-export const getPizzas = () =>
-  new Promise(resolve => {
-    setTimeout(() => resolve(pizzas), 500)
-  })
+export default api;

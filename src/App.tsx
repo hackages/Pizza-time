@@ -3,12 +3,11 @@ import React, {
   useEffect,  
   useCallback
 } from 'react'
-import {HommePizzas, PizzaState, Pizza} from './components/pizzas/HomePizzas'
+import {HommePizzas, Pizza} from './components/pizzas/HomePizzas'
 import {Header} from './components/dumb/Header'
 import {BasketList} from './components/basket/BasketList'
 import {MainDiv} from './components/dumb/style/styleComponents'
 import { useDispatch, useSelector } from 'react-redux'
-import {getPizzas} from './api'
 import { 
   startLoading,
   addPizzas, 
@@ -20,6 +19,7 @@ import {
   pay 
 } from './actions'
 import { State } from './reducers'
+import api from './api'
 
 /*
 / This is the main file of app
@@ -51,15 +51,23 @@ export const AppCtx = createContext({} as AppContextData)
 
 // A stateless component
 const App = () => {
-  const { basket, isHidden, isLoading, payed, data, isError } = useSelector<State, State>(state => state)
+  const { 
+    basket,
+    isHidden, 
+    isLoading, 
+    payed, 
+    data, 
+    isError 
+  } = useSelector<State, State>(state => state)
+
   const dispatch = useDispatch()
   // we fetch the pizzas
   useEffect(() => {
     async function loadPizzas() {
       try {
         dispatch(startLoading())
-        const pizzas = await getPizzas() as Pizza[]
-        dispatch(addPizzas(pizzas))
+        const response = await api.get<Pizza[]>('/pizzas');
+        dispatch(addPizzas(response.data))
       } catch {
         dispatch(showError())
       } finally {
