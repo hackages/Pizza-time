@@ -18,7 +18,7 @@ import {
   updateBasket, 
   pay 
 } from './actions'
-import { State } from './reducers'
+import { RootState } from './reducers'
 import api from './api'
 
 /*
@@ -51,14 +51,10 @@ export const AppCtx = createContext({} as AppContextData)
 
 // A stateless component
 const App = () => {
-  const { 
-    basket,
-    isHidden, 
-    isLoading, 
-    payed, 
-    data, 
-    isError 
-  } = useSelector<State, State>(state => state)
+  const { ui, pizza } = useSelector<RootState, RootState>(state => state)
+
+  const { isHidden, isLoading, isError }  = ui;
+  const { basket, payed, data }  = pizza;
 
   const dispatch = useDispatch()
   // we fetch the pizzas
@@ -103,7 +99,7 @@ const App = () => {
   const payBasket = useCallback(() => {
     dispatch(pay())
   }, [dispatch, pay])
-    
+
   return (
     <AppCtx.Provider
       value={{

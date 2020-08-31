@@ -2,12 +2,14 @@ import React, { useMemo, useContext } from 'react'
 import {computeTotalPrice} from '../../helpers/basket'
 import {getFormattedPrice} from '../../helpers/currencies'
 import {UserBasketDiv, StyledDiv} from '../dumb/style/styleComponents'
-import { State } from '../../reducers'
+import { RootState } from '../../reducers'
 import { useSelector } from 'react-redux'
 import { AppCtx } from '../../App'
 
 export const UserBasket = () => {
-  const { data: pizzas, basket, isHidden } = useSelector<State, State>(state => state)
+  const { pizza, ui } = useSelector<RootState, RootState>(state => state)
+  const { data: pizzas, basket } = pizza;
+  const { isHidden } = ui;
   const { setIsHidden } = useContext(AppCtx)
   
   const total = useMemo(() => {

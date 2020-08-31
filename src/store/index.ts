@@ -1,16 +1,20 @@
 import { createStore } from 'redux';
-import reducer, { State } from '../reducers';
+import { rootReducer} from '../reducers';
 
 const initialState = {
-  isHidden: true,
-  isLoading: false,
-  isError: false,
-  data: [],
-  basket: {},
-  payed: false,
+  ui: {
+    isHidden: true,
+    isLoading: false,
+    isError: false
+  },
+  pizza: {
+    data: [],
+    basket: {},
+    payed: false,
+  }
 }
 
 export const store = createStore(
-  reducer,
+  rootReducer,
   initialState
 )
