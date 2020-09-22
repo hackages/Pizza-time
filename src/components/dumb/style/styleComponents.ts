@@ -1,6 +1,14 @@
 import styled from 'styled-components'
 
-export const ListBasket = styled.div`
+interface ListBasketProps {
+  isHidden: boolean;
+}
+
+interface PizzaListProps {
+  isHidden: boolean;
+}
+
+export const ListBasket = styled.div<ListBasketProps>`
   display: ${props => (props.isHidden ? 'none' : 'flex')};
   flex-direction: column;
   width: 35%;
@@ -69,7 +77,7 @@ export const HeaderDiv = styled.div`
   box-shadow: 1px 1px 2px #757575;
 `
 
-export const PizzaList = styled.div`
+export const PizzaList = styled.div<PizzaListProps>`
   display: flex;
   flex-direction: column;
   width: ${props => (props.isHidden ? '100%' : '65%')};

@@ -1,0 +1,8 @@
+export const START_LOADING = 'START_LOADING'
+export const STOP_LOADING = 'STOP_LOADING'
+export const SHOW_ERROR = 'SHOW_ERROR'
+export const SET_HIDDEN = 'SET_HIDDEN'
+export const ADD_PIZZAS = 'ADD_PIZZAS'
+export const RESTART_TRANSACTION = 'RESTART_TRANSACTION'
+export const UPDATE_BASKET = 'UPDATE_BASKET'
+export const PAY_BASKET = 'PAY_BASKET'
